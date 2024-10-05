@@ -35,7 +35,8 @@ func (app *application) serve() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		// Call Shutdown() on the server like before, but now we only send on the
-		// shutdownError channel if it returns an error.err := srv.Shutdown(ctx)
+		// shutdownError channel if it returns an error.
+		err := srv.Shutdown(ctx)
 		if err != nil {
 			shutdownError <- err
 		}
