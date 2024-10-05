@@ -2,25 +2,21 @@ package main
 
 import (
 	"context"
-
-	// New import
-	"database/sql" // New import
+	"database/sql"
 	"flag"
 	"os"
 	"time"
 
-	// Import the pq driver so that it can register itself with the database/sql
-	// package. Note that we alias this import to the blank identifier, to stop the Go
-	// compiler complaining that the package isn't being used.
+	// New import
 	"github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions/internal/data"
 	"github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions/internal/jsonlog"
+	"github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions/internal/mailer"
 	_ "github.com/lib/pq"
 )
 
 const version = "1.0.0"
 
-// Add maxOpenConns, maxIdleConns and maxIdleTime fields to hold the configuration
-// settings for the connection pool.
+// Update the config struct to hold the SMTP server settings.// Update the config struct to hold the SMTP server settings.
 type config struct {
 	port int
 	env  string
@@ -31,16 +27,25 @@ type config struct {
 		maxIdleTime  string
 	}
 	limiter struct {
+		enabled bool
 		rps     float64
 		burst   int
-		enabled bool
+	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
 	}
 }
+
+// Update the application struct to hold a new Mailer instance.
 type application struct {
 	config config
 	logger *jsonlog.Logger
-	// Add a models field to hold our new Models struct.
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -51,9 +56,18 @@ func main() {
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
+	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
-	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	// Read the SMTP server configuration settings into the config struct, using the
+	// Mailtrap settings as the default values. IMPORTANT: If you're following along,
+	// make sure to replace the default values for smtp-username and smtp-password
+	// with your own Mailtrap credentials.
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "578e5434b34960", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "7a5e0c379a5a54", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.suport>", "SMTP sender")
 	flag.Parse()
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	db, err := openDB(cfg)
@@ -62,12 +76,14 @@ func main() {
 	}
 	defer db.Close()
 	logger.PrintInfo("database connection pool established", nil)
+	// Initialize a new Mailer instance using the settings from the command line
+	// flags, and add it to the application struct.
 	app := &application{
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
-	// Call app.serve() to start the server.
 	err = app.serve()
 	if err != nil {
 		logger.PrintFatal(err, nil)
