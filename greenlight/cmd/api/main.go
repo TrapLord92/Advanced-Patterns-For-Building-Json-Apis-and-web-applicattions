@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"flag"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -39,6 +40,10 @@ type config struct {
 		password string
 		sender   string
 	}
+	// Add a cors struct and trustedOrigins field with the type []string.
+	cors struct {
+		trustedOrigins []string
+	}
 }
 
 // Update the application struct to hold a new Mailer instance.
@@ -70,6 +75,11 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "578e5434b34960", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "7a5e0c379a5a54", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.suport>", "SMTP sender")
+
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
+		cfg.cors.trustedOrigins = strings.Fields(val)
+		return nil
+	})
 	flag.Parse()
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	db, err := openDB(cfg)
