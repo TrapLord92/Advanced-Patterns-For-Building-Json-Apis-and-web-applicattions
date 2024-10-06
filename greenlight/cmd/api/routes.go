@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -21,6 +22,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
+	// Register a new GET /debug/vars endpoint pointing to the expvar handler.
+	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
 	// Add the enableCORS() middleware.
 	return app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router))))
 }
