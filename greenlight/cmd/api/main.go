@@ -2,26 +2,22 @@ package main
 
 import (
 	"context"
-	// New import
-	"database/sql" // New import
+	"database/sql"
 	"flag"
-	"fmt"
-	"log"
-	"net/http"
 	"os"
+	"sync"
 	"time"
 
-	// Import the pq driver so that it can register itself with the database/sql
-	// package. Note that we alias this import to the blank identifier, to stop the Go
-	// compiler complaining that the package isn't being used.
+	// New import
 	"github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions/internal/data"
+	"github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions/internal/jsonlog"
+	"github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions/internal/mailer"
 	_ "github.com/lib/pq"
 )
 
 const version = "1.0.0"
 
-// Add maxOpenConns, maxIdleConns and maxIdleTime fields to hold the configuration
-// settings for the connection pool.
+// Update the config struct to hold the SMTP server settings.// Update the config struct to hold the SMTP server settings.
 type config struct {
 	port int
 	env  string
@@ -31,12 +27,27 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+	limiter struct {
+		enabled bool
+		rps     float64
+		burst   int
+	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
+
+// Update the application struct to hold a new Mailer instance.
 type application struct {
 	config config
-	logger *log.Logger
-	// Add a models field to hold our new Models struct.
+	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -44,46 +55,41 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
-	// Read the connection pool settings from command-line flags into the config struct.
-	// Notice the default values that we're using?
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
+	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
+	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
+	// Read the SMTP server configuration settings into the config struct, using the
+	// Mailtrap settings as the default values. IMPORTANT: If you're following along,
+	// make sure to replace the default values for smtp-username and smtp-password
+	// with your own Mailtrap credentials.
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "578e5434b34960", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "7a5e0c379a5a54", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.suport>", "SMTP sender")
 	flag.Parse()
-
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	// Call the openDB() helper function (see below) to create the connection pool,
-	// passing in the config struct. If this returns an error, we log it and exit the
-	// application immediately.
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
-	// Defer a call to db.Close() so that the connection pool is closed before the
-	// main() function exits.
 	defer db.Close()
-	// Also log a message to say that the connection pool has been successfully
-	// established.
-	logger.Printf("database connection pool established")
+	logger.PrintInfo("database connection pool established", nil)
+	// Initialize a new Mailer instance using the settings from the command line
+	// flags, and add it to the application struct.
 	app := &application{
 		config: cfg,
 		logger: logger,
-		// Use the data.NewModels() function to initialize a Models struct, passing in the
-		// connection pool as a parameter.
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+	err = app.serve()
+	if err != nil {
+		logger.PrintFatal(err, nil)
 	}
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
-	// Because the err variable is now already declared in the code above, we need
-	// to use the = operator here, instead of the := operator.
-	err = srv.ListenAndServe()
-	logger.Fatal(err)
 }
 
 /*x**x*x*x*x**x*x*xDatabase open*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x**xx*x**/
