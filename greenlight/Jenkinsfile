@@ -1,5 +1,5 @@
 pipeline {
-    agent any// Specify the agent by label
+    agent any // Specify the agent by label
     tools {
         go '1.23.2' // Ensure the tool is referenced correctly
     }
@@ -11,22 +11,17 @@ pipeline {
                 echo 'Building the app'
             }
         }
-    }
-    stages {
         stage('Test') {
             steps {
                 echo 'Testing the App...'
-                echo'test complete'
+                echo 'test complete'
             }
         }
-    }
-    stages {
-        stage('deploy') {
+        stage('Deploy') {
             steps {
                 echo 'preparing the App for deployment...'
-                echo'deployment complete'
+                echo 'deployment complete'
             }
         }
     }
 }
-
