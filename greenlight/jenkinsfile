@@ -1,0 +1,14 @@
+pipeline {
+    agent any// Specify the agent by label
+    tools {
+        go '1.23.2' // Ensure the tool is referenced correctly
+    }
+    stages {
+        stage('Example') {
+            steps {
+                echo 'checking go version...'
+                sh 'go version'
+            }
+        }
+    }
+}
