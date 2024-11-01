@@ -4,11 +4,29 @@ pipeline {
         go '1.23.2' // Ensure the tool is referenced correctly
     }
     stages {
-        stage('Example') {
+        stage('Build') {
             steps {
                 echo 'checking go version...'
                 sh 'go version'
+                echo 'Building the app'
+            }
+        }
+    }
+    stages {
+        stage('Test') {
+            steps {
+                echo 'Testing the App...'
+                echo'test complete'
+            }
+        }
+    }
+    stages {
+        stage('deploy') {
+            steps {
+                echo 'preparing the App for deployment...'
+                echo'deployment complete'
             }
         }
     }
 }
+
