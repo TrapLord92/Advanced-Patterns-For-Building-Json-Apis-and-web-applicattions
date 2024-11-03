@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        go '1.23.2' // Matches the Go version in Jenkins
+        go '1.23.2' // Ensure the specified version of Go is installed
     }
     environment {
         NEXUS_URL = '192.168.1.46:8083'
@@ -14,23 +14,38 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions.git'
             }
         }
+        stage('Verify Go Installation') {
+            steps {
+                sh 'go version' // Check Go version to confirm it's available
+            }
+        }
+        stage('Prepare Environment') {
+            steps {
+                dir('greenlight') {
+                    sh 'go mod tidy' // Ensure dependencies are installed
+                }
+            }
+        }
         stage('Build') {
             steps {
-                sh 'go version' // Verifies Go is set up
-                sh 'go mod tidy' // Installs dependencies
-                // Adjust the path if your main.go is located in cmd/ or another folder
-                sh 'go build -o app ./cmd' 
+                dir('greenlight') {
+                    sh 'go build -o app ./cmd' // Adjust path if main.go is elsewhere
+                }
             }
         }
         stage('Test') {
             steps {
-                sh 'go test ./...' // Runs tests
+                dir('greenlight') {
+                    sh 'go test ./...' // Run tests in the correct directory
+                }
             }
         }
         stage('Docker Build and Push') {
             steps {
-                sh 'docker build -t ${NEXUS_URL}/${NEXUS_REPO}:${TAG} .'
-                sh 'docker push ${NEXUS_URL}/${NEXUS_REPO}:${TAG}'
+                dir('greenlight') {
+                    sh 'docker build -t ${NEXUS_URL}/${NEXUS_REPO}:${TAG} .'
+                    sh 'docker push ${NEXUS_URL}/${NEXUS_REPO}:${TAG}'
+                }
             }
         }
     }
