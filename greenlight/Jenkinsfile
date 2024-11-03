@@ -42,7 +42,7 @@ pipeline {
         }
         stage('Docker Build and Push') {
             steps {
-                dir('greenlight/movie') {
+                dir('greenlight') {
                     sh 'docker build -f movieApi.dockerfile -t ${NEXUS_URL}/${NEXUS_REPO}:${TAG} .'
                     sh 'docker push ${NEXUS_URL}/${NEXUS_REPO}:${TAG}'
                 }
