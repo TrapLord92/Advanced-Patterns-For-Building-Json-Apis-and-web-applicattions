@@ -1,6 +1,6 @@
 // buildDockerImage.groovy
 
-def call(String credentialsId, String dockerFile, String imageName) {
+def buildDockerImage(String credentialsId, String dockerFile, String imageName) {
     echo "Building the Docker image in directory 'greenlight'"
     
     dir('greenlight') {
@@ -13,4 +13,10 @@ def call(String credentialsId, String dockerFile, String imageName) {
             sh "docker push ${imageName}"
         }
     }
+}
+
+def build_go_binary(){
+     echo "Building Go binary"
+                    // Compile Go binary
+                    sh 'go build -o greenlight/bin/movieApi greenlight/cmd/movieApi/main.go'
 }

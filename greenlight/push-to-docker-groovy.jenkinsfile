@@ -1,15 +1,22 @@
+def gv
 pipeline {
     agent any
     tools {
         go '1.23.1'
     }
     stages {
+        stage("init"){
+            steps{
+                script{
+                    gv=load "buildDockerImage.groovy"
+                }
+            }
+        }
         stage("Build Go Binary") {
             steps {
                 script {
-                    echo "Building Go binary"
-                    // Compile Go binary
-                    sh 'go build -o greenlight/bin/movieApi greenlight/cmd/movieApi/main.go'
+                    gv.build_go_binary()
+                   
                 }
             }
         }
@@ -18,10 +25,9 @@ pipeline {
             steps {
                 script {
                     // Load the external Groovy script
-                    def buildDockerImage = load 'greenlight/buildDockerImage.groovy'
                     
                     // Call the function in the external script with appropriate arguments
-                    buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
+                    gv.buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
                 }
             }
         }
