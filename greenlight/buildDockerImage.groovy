@@ -20,3 +20,6 @@ def build_go_binary() {
     // Compile Go binary
     sh 'go build -o greenlight/bin/movieApi greenlight/cmd/movieApi/main.go'
 }
+
+
+return this
