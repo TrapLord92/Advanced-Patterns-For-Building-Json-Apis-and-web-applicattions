@@ -1,0 +1,39 @@
+pipeline {
+  agent any
+  environment {
+    NEXUS_URL = '192.168.1.46:8083'
+    NEXUS_REPO = 'docker-hub-repo'
+    TAG = 'latest'
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        git 'https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions.git'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'go build -o app main.go'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh 'go test ./...'
+      }
+    }
+    stage('Docker Build and Push') {
+      steps {
+        sh 'docker build -t ${NEXUS_URL}/${NEXUS_REPO}:${TAG} .'
+        sh 'docker push ${NEXUS_URL}/${NEXUS_REPO}:${TAG}'
+      }
+    }
+  }
+  post {
+    success {
+      echo 'Pipeline completed successfully!'
+    }
+    failure {
+      echo 'Pipeline failed.'
+    }
+  }
+}
