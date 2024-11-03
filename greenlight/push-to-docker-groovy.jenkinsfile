@@ -19,7 +19,7 @@ pipeline {
                     def buildDockerImage = load 'buildDockerImage.groovy'
                     
                     // Call the function in the external script
-                    buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vDP')
+                    buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
                 }
             }
         }
