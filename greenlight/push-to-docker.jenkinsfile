@@ -1,38 +1,36 @@
-pipeline{
+pipeline {
     agent any
-    tools{
+    tools {
         go '1.23.1'
     }
-    stages{
-        stage("build go binary"){
-            script{
-                echo "Building go binary"
+    stages {
+        stage("build go binary") {
+            steps {
+                script {
+                    echo "Building go binary"
+                }
             }
         }
 
-
-          stage("build docker image "){
-            script{
-                echo "Building the docker image"
-                withCredentials([usernamePassword(credentialsId:'Docker-hub',passwordVariable:'PASS',usernameVariable:'USER')])
-
-            
-           sh 'docker build -f movieApi.dockerfile -t traplord92/movie_api:vDP .'
-            sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
-            sh 'docker push traplord92/movie_api:vDP'
-
+        stage("build docker image") {
+            steps {
+                script {
+                    echo "Building the docker image"
+                    withCredentials([usernamePassword(credentialsId: 'Docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh 'docker build -f movieApi.dockerfile -t traplord92/movie_api:vDP .'
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh 'docker push traplord92/movie_api:vDP'
+                    }
+                }
             }
         }
 
-
-          stage("deploy"){
-            script{
-                echo "Deploying docker  image"
-
+        stage("deploy") {
+            steps {
+                script {
+                    echo "Deploying docker image"
+                }
             }
         }
-
-
-
     }
 }
