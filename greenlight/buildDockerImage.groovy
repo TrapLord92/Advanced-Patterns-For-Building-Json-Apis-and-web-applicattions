@@ -16,9 +16,10 @@ def buildDockerImage(String credentialsId, String dockerFile, String imageName) 
 }
 
 def build_go_binary() {
+    dir('greenlight'){
     echo "Building Go binary"
     // Compile Go binary
-    sh 'go build -o greenlight/bin/movieApi greenlight/cmd/api/main.go'
+    sh 'go build -o greenlight/cmd/api/main.go'}
 }
 
 
