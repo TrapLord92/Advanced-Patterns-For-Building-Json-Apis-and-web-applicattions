@@ -4,31 +4,33 @@ pipeline {
         go '1.23.1'
     }
     stages {
-        stage("build go binary") {
+        stage("Build Go Binary") {
             steps {
                 script {
-                    echo "Building go binary"
+                    echo "Building Go binary"
+                    // Compile Go binary
+                    sh 'go build -o greenlight/bin/movieApi greenlight/cmd/movieApi/main.go'
                 }
             }
         }
 
-        stage("build docker image") {
+        stage("Build Docker Image") {
             steps {
                 script {
                     // Load the external Groovy script
                     def buildDockerImage = load 'greenlight/buildDockerImage.groovy'
-
                     
-                    // Call the function in the external script
+                    // Call the function in the external script with appropriate arguments
                     buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
                 }
             }
         }
 
-        stage("deploy") {
+        stage("Deploy") {
             steps {
                 script {
-                    echo "Deploying docker image"
+                    echo "Deploying Docker image"
+                    // Add deployment steps here as needed
                 }
             }
         }
