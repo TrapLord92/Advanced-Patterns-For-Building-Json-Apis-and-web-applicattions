@@ -15,8 +15,8 @@ def buildDockerImage(String credentialsId, String dockerFile, String imageName) 
     }
 }
 
-def build_go_binary(){
-     echo "Building Go binary"
-                    // Compile Go binary
-                    sh 'go build -o greenlight/bin/movieApi greenlight/cmd/movieApi/main.go'
+def build_go_binary() {
+    echo "Building Go binary"
+    // Compile Go binary
+    sh 'go build -o greenlight/bin/movieApi greenlight/cmd/movieApi/main.go'
 }

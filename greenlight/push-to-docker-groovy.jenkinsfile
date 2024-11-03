@@ -1,22 +1,25 @@
-def gv
+def gv  // Declare the variable outside the pipeline block
+
 pipeline {
     agent any
     tools {
         go '1.23.1'
     }
     stages {
-        stage("init"){
-            steps{
-                script{
-                    gv=load "buildDockerImage.groovy"
+        stage("Initialize") {
+            steps {
+                script {
+                    // Load the external Groovy script
+                    gv = load "buildDockerImage.groovy"
                 }
             }
         }
+
         stage("Build Go Binary") {
             steps {
                 script {
+                    // Call the build_go_binary function
                     gv.build_go_binary()
-                   
                 }
             }
         }
@@ -24,9 +27,7 @@ pipeline {
         stage("Build Docker Image") {
             steps {
                 script {
-                    // Load the external Groovy script
-                    
-                    // Call the function in the external script with appropriate arguments
+                    // Call the buildDockerImage function with arguments
                     gv.buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
                 }
             }
