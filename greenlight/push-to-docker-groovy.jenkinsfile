@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    tools {
+        go '1.23.1'
+    }
+    stages {
+        stage("build go binary") {
+            steps {
+                script {
+                    echo "Building go binary"
+                }
+            }
+        }
+
+        stage("build docker image") {
+            steps {
+                script {
+                    // Load the external Groovy script
+                    def buildDockerImage = load 'buildDockerImage.groovy'
+                    
+                    // Call the function in the external script
+                    buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vDP')
+                }
+            }
+        }
+
+        stage("deploy") {
+            steps {
+                script {
+                    echo "Deploying docker image"
+                }
+            }
+        }
+    }
+}
