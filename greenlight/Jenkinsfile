@@ -1,46 +1,43 @@
 pipeline {
-  agent any
-  environment {
-    NEXUS_URL = '192.168.1.46:8083'
-    NEXUS_REPO = 'docker-hub-repo'
-    TAG = 'latest'
-  }
-  options {
-    retry(3) // Retry up to 3 times if the job fails due to network or minor issues
-  }
-  stages {
-    stage('Checkout') {
-      steps {
-        // Fetch the main branch from the Git repository
-        git branch: 'main', url: 'https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions.git'
-      }
+    agent any
+    tools {
+        go '1.23.2' // This should match the name in Global Tool Configuration
     }
-    stage('Build') {
-      steps {
-        // Build the Go application
-        sh 'go build -o app main.go'
-      }
+    environment {
+        NEXUS_URL = '192.168.1.46:8083'
+        NEXUS_REPO = 'docker-hub-repo'
+        TAG = 'latest'
     }
-    stage('Test') {
-      steps {
-        // Run Go tests
-        sh 'go test ./...'
-      }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'go version' // Verify Go version to ensure it is correctly loaded
+                sh 'go build -o app main.go'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'go test ./...'
+            }
+        }
+        stage('Docker Build and Push') {
+            steps {
+                sh 'docker build -t ${NEXUS_URL}/${NEXUS_REPO}:${TAG} .'
+                sh 'docker push ${NEXUS_URL}/${NEXUS_REPO}:${TAG}'
+            }
+        }
     }
-    stage('Docker Build and Push') {
-      steps {
-        // Build and push the Docker image to Nexus
-        sh 'docker build -t ${NEXUS_URL}/${NEXUS_REPO}:${TAG} .'
-        sh 'docker push ${NEXUS_URL}/${NEXUS_REPO}:${TAG}'
-      }
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
     }
-  }
-  post {
-    success {
-      echo 'Pipeline completed successfully!'
-    }
-    failure {
-      echo 'Pipeline failed.'
-    }
-  }
 }
