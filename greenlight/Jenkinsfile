@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        go '1.23.2' // This should match the name in Global Tool Configuration
+        go '1.23.2' // Matches the Go version in Jenkins
     }
     environment {
         NEXUS_URL = '192.168.1.46:8083'
@@ -16,13 +16,15 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'go version' // Verify Go version to ensure it is correctly loaded
-                sh 'go build -o app main.go'
+                sh 'go version' // Verifies Go is set up
+                sh 'go mod tidy' // Installs dependencies
+                // Adjust the path if your main.go is located in cmd/ or another folder
+                sh 'go build -o app ./cmd' 
             }
         }
         stage('Test') {
             steps {
-                sh 'go test ./...'
+                sh 'go test ./...' // Runs tests
             }
         }
         stage('Docker Build and Push') {
