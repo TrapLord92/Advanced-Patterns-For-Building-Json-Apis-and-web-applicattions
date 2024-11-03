@@ -16,7 +16,8 @@ pipeline {
             steps {
                 script {
                     // Load the external Groovy script
-                    def buildDockerImage = load 'buildDockerImage.groovy'
+                    def buildDockerImage = load 'greenlight/buildDockerImage.groovy'
+
                     
                     // Call the function in the external script
                     buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
