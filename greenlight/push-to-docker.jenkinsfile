@@ -1,0 +1,38 @@
+pipeline{
+    agent any
+    tools{
+        go '1.23.1'
+    }
+    stages{
+        stage("build go binary"){
+            script{
+                echo "Building go binary"
+            }
+        }
+
+
+          stage("build docker image "){
+            script{
+                echo "Building the docker image"
+                withCredentials([usernamePassword(credentialsId:'Docker-hub',passwordVariable:'PASS',usernameVariable:'USER')])
+
+            
+           sh 'docker build -f movieApi.dockerfile -t traplord92/movie_api:vDP .'
+            sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+            sh 'docker push traplord92/movie_api:vDP'
+
+            }
+        }
+
+
+          stage("deploy"){
+            script{
+                echo "Deploying docker  image"
+
+            }
+        }
+
+
+
+    }
+}
