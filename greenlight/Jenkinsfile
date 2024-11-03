@@ -29,7 +29,7 @@ pipeline {
         stage('Build') {
             steps {
                 dir('greenlight') {
-                    sh 'go build -o app ./cmd' // Adjust path if main.go is elsewhere
+                    sh 'go build -o app ./cmd/api' // Adjust path if main.go is elsewhere
                 }
             }
         }
