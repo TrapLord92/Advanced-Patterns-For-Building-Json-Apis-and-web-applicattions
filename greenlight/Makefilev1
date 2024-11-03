@@ -5,7 +5,6 @@
 .PHONY: help
 help:
 	@echo 'Usage:'
-	@echo 'Available commands:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
 .PHONY: confirm
@@ -18,12 +17,12 @@ confirm:
 ## Get the Git commit hash and version based on it
 GIT_COMMIT = $(shell git rev-parse --short HEAD)
 VERSION = $(shell git describe --tags --always --dirty)
-NEXUS_PASSWORD ?= Baby78678669 # Get password from environment
+NEXUS_PASSWORD ?= Baby78697869 # Get password from environment
 NEXUS_USERNAME ?= repoworker
 NEXUS_URL ?= http://192.168.1.46:8081/repository/golang-binary-repo/
 NEXUS_DOCKER_IP ?= 192.168.1.46:8083
 NEXUS_DOCKER_REPO ?= docker-hub-repo
-REPOSITORY ?= golang-binary-repo
+REPOSITORY ?=golang-binary-repo
 PROJECT_KEY ?= Movie-Api
 PROJECT_NAME ?= Golang-json-Api
 ARTIFACT_NAME ?= api
@@ -99,31 +98,31 @@ build/api:
 # ==================================================================================== #
 # DOCKER OPERATIONS
 # ==================================================================================== #
-## login-to-nexus-docker: login to Nexus Docker repository
+# Docker repository login
 .PHONY: login-to-nexus-docker
 login-to-nexus-docker:
 	@docker login -u ${NEXUS_USERNAME} -p ${NEXUS_PASSWORD} ${NEXUS_DOCKER_IP}
 
-## docker-build: build Docker image with specified Dockerfile, tag, and version
+# Build Docker image with specified Dockerfile, tag, and version
 .PHONY: docker-build
 docker-build: build/api
 	@echo "Building Docker image with ${dockerfile}..."
 	@docker build -f ${dockerfile} -t ${DOCKER_IMAGE} .
 	@echo "Docker image ${DOCKER_IMAGE} built successfully."
 
-## docker-tag-with-repo: tag Docker image with Nexus repository
+# Tag Docker image with Nexus repository
 .PHONY: docker-tag-with-repo
 docker-tag-with-repo: docker-build
 	@docker tag ${DOCKER_IMAGE} ${NEXUS_DOCKER_IP}/${NEXUS_DOCKER_REPO}/${ARTIFACT_NAME}:$(VERSION)
 	@echo "Docker image tagged as ${NEXUS_DOCKER_IP}/${NEXUS_DOCKER_REPO}/${ARTIFACT_NAME}:$(VERSION)."
 
-## docker-push: push Docker image to Docker Hub via Nexus URL
+# Push Docker image to Docker Hub via Nexus URL
 .PHONY: docker-push
 docker-push: docker-tag-with-repo
 	@docker push ${NEXUS_DOCKER_IP}/${NEXUS_DOCKER_REPO}/${ARTIFACT_NAME}:$(VERSION)
 	@echo "Docker image ${NEXUS_DOCKER_IP}/${NEXUS_DOCKER_REPO}/${ARTIFACT_NAME}:$(VERSION) pushed successfully to Docker Hub."
 
-## raw-push: raw file upload to Nexus
+# Raw file upload to Nexus
 .PHONY: raw-push
 raw-push: build/api
 	@curl -u $(NEXUS_USERNAME):$(NEXUS_PASSWORD) \
@@ -132,18 +131,18 @@ raw-push: build/api
 		--fail --silent --show-error || { echo "Failed to upload $(ARTIFACT_NAME). Please check the credentials, URL, and Nexus server logs."; exit 1; }
 	@echo "$(ARTIFACT_NAME) version $(VERSION) published successfully to Nexus."
 
-## publish: combined publish target for Docker and raw artifact
+# Combined publish target for Docker and raw artifact
 .PHONY: publish
 publish: docker-push raw-push
 
-## clean: clean up generated artifacts (optional)
+# Clean up generated artifacts (optional)
 .PHONY: clean
 clean:
 	@echo "Cleaning up generated files..."
 	rm -rf ./bin/* ./migrations/*.sql
 	@echo "Cleaned up generated files."
 
-## info: print configuration (for debugging purposes)
+# Print configuration (for debugging purposes)
 .PHONY: info
 info:
 	@echo "Nexus Username: $(NEXUS_USERNAME)"
@@ -159,20 +158,3 @@ info:
 
 # Default target
 .PHONY: help login-to-nexus-docker build/api docker-build docker-tag-with-repo docker-push raw-push publish clean info
-
-# ==================================================================================== #
-# CHECK NEXUS REPOS
-# ==================================================================================== #
-## check-docker-repo-nexus: check Docker repository in Nexus
-.PHONY: check-docker-repo-nexus
-check-docker-repo-nexus:
-	@ CHECK_URL=http://192.168.1.46:8081/service/rest/v1/components?Repository \
-		CURL=curl -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} -X GET && \
-		${CURL} $$CHECK_URL${NEXUS_DOCKER_REPO}
-
-## check-golang-repo-nexus: check Golang repository in Nexus
-.PHONY: check-golang-repo-nexus
-check-golang-repo-nexus:
-	@ CHECK_URL=http://192.168.1.46:8081/service/rest/v1/components?Repository \
-		CURL=curl -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} -X GET && \
-		${CURL} $$CHECK_URL${REPOSITORY}

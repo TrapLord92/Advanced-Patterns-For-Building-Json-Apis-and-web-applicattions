@@ -1,2 +1,5 @@
 .envrc
 bin
+movie-api.yaml
+.instruction
+.env 
