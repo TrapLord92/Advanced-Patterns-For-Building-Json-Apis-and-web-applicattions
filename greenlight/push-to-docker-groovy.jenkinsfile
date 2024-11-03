@@ -10,7 +10,7 @@ pipeline {
             steps {
                 script {
                     // Load the external Groovy script
-                    gv = load "buildDockerImage.groovy"
+                    gv = load "greenlight/buildDockerImage.groovy"
                 }
             }
         }
