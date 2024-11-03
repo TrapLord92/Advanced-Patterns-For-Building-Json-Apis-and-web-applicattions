@@ -19,8 +19,9 @@ def build_go_binary() {
     dir('greenlight'){
     echo "Building Go binary"
     // Compile Go binary
-    sh 'go build -o greenlight/cmd/api/main.go'}
-}
+     sh 'go build -o app ./cmd/api'
+    echo "Build complete"
+}}
 
 
 return this
