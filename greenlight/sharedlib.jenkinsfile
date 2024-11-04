@@ -39,6 +39,7 @@ pipeline {
             steps {
                 script {
                     echo "Deploying Docker image"
+                    echo "webhook work just fine"
                     // Add deployment steps here as needed
                 }
             }
