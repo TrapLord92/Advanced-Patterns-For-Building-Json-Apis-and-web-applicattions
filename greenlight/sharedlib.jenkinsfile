@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-@library('Jenkins-shared-library')
+@Library('Jenkins-shared-library')
 def gv  // Declare the variable outside the pipeline block
 
 pipeline {
