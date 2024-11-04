@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-@Library('Jenkins-shared-library')
+@Library('Jenkins-shared-library') _
 def gv  // Declare the variable outside the pipeline block
 
 pipeline {
@@ -31,7 +31,6 @@ pipeline {
                 script {
                     // Call the buildDockerImage function with arguments
                     buildDockerImage('Docker-hub', 'movieApi.dockerfile', 'traplord92/movie_api:vGroovy')
-                    
                 }
             }
         }
