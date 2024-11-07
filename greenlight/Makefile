@@ -18,7 +18,7 @@ confirm:
 ## Get the Git commit hash and version based on it
 GIT_COMMIT = $(shell git rev-parse --short HEAD)
 VERSION = $(shell git describe --tags --always --dirty)
-NEXUS_PASSWORD ?= Baby78678669 # Get password from environment
+NEXUS_PASSWORD ?= Baby78697869
 NEXUS_USERNAME ?= repoworker
 NEXUS_URL ?= http://192.168.1.46:8081/repository/golang-binary-repo/
 NEXUS_DOCKER_IP ?= 192.168.1.46:8083
@@ -165,14 +165,4 @@ info:
 # ==================================================================================== #
 ## check-docker-repo-nexus: check Docker repository in Nexus
 .PHONY: check-docker-repo-nexus
-check-docker-repo-nexus:
-	@ CHECK_URL=http://192.168.1.46:8081/service/rest/v1/components?Repository \
-		CURL=curl -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} -X GET && \
-		${CURL} $$CHECK_URL${NEXUS_DOCKER_REPO}
-
-## check-golang-repo-nexus: check Golang repository in Nexus
-.PHONY: check-golang-repo-nexus
-check-golang-repo-nexus:
-	@ CHECK_URL=http://192.168.1.46:8081/service/rest/v1/components?Repository \
-		CURL=curl -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} -X GET && \
-		${CURL} $$CHECK_URL${REPOSITORY}
+#TODO
