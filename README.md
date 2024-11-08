@@ -54,7 +54,7 @@ To configure your database, fill in the following details:
 1. **Clone This Project**
 
    ```bash
-   git clone https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applications.git
+   git clone https://github.com/yourusername/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions.git
    cd greenlight
    ```
 
