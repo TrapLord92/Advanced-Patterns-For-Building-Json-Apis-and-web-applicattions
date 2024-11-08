@@ -1,17 +1,15 @@
 
----
-
 # 🎬 Movie API - A Golang Project for Movie Lovers!
 
-Welcome to **Movie API**, a fully featured RESTful API built in **Golang** for managing movie data. This API supports CRUD operations, user authentication, and integration with **Nexus** for artifact management, with a CI/CD pipeline set up using **Jenkins**.
+Welcome to **Movie API**, a fully featured RESTful API built in **Golang** for managing movie data. This API supports CRUD operations, user authentication, and integrates with **Nexus** for artifact management, with a CI/CD pipeline set up using **Jenkins**.
 
 ## 🚀 Features
 
-- **Full CRUD Operations**: Create, read, update, and delete movies with ease.
+- **Full CRUD Operations**: Create, read, update, and delete movies.
 - **Filter, Sort & Paginate**: Search and organize movie data.
-- **User Registration & Authentication**: Secure user access with token-based authentication.
-- **Welcome & Activation Emails**: Send welcome and account activation emails automatically.
-- **Monitoring & Logging**: Includes structured logging, error handling, rate limiting, and application health checks.
+- **User Registration & Authentication**: Secure access with token-based authentication.
+- **Welcome & Activation Emails**: Automatically send welcome and account activation emails.
+- **Monitoring & Logging**: Includes structured logging, error handling, rate limiting, and health checks.
 - **Cross-Origin (CORS) Support**: Access the API across different origins.
 - **Metrics**: Track usage and performance stats with built-in metrics.
 
@@ -19,11 +17,11 @@ Welcome to **Movie API**, a fully featured RESTful API built in **Golang** for m
 
 This project comes with an automated **CI/CD pipeline** to streamline your development process:
 
-- **Jenkins**: Automates the build and deployment process.
+- **Jenkins**: Automates build and deployment.
 - **Nexus**: Manages Docker images and binary artifacts.
 - **Docker**: Containerizes the application for easy deployment.
 
-The pipeline handles building, testing, and pushing Docker images to **Nexus**, as well as publishing raw artifacts for your movie API project.
+The pipeline handles building, testing, and pushing Docker images to **Nexus**, as well as publishing raw artifacts.
 
 ## 🛠 Getting Started
 
@@ -35,27 +33,28 @@ Make sure you have the following:
 - **PostgreSQL** for data storage
 - **Docker** (optional, for containerization)
 - **Nexus** repository for Docker and raw file storage
-- **Jenkins** (for CI/CD pipeline automation)
+- **Jenkins** (for CI/CD automation)
 
 ### Database Configuration
 
 To configure your database, fill in the following details:
 
 1. **Set up your PostgreSQL database** with your credentials.
-2. **Update the `.env` file** with your **Greenlight DB** credentials:
+2. **Update the `.env` file** with your database credentials:
 
-```bash
-DB_USER=<your_db_user>
-DB_PASSWORD=<your_db_password>
-export GREENLIGHT_DB_DSN="postgres://<your_db_user>:<your_db_password>@db/<your_db_name>?sslmode=disable"
-DB_NAME=<your_db_name>
-```
+   ```bash
+   DB_USER=<your_db_user>
+   DB_PASSWORD=<your_db_password>
+   DB_NAME=<your_db_name>
+   export GREENLIGHT_DB_DSN="postgres://<your_db_user>:<your_db_password>@db/<your_db_name>?sslmode=disable"
+   ```
 
 ### Setup
 
 1. **Clone This Project**
+
    ```bash
-   git clone https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applicattions.git
+   git clone https://github.com/TrapLord92/Advanced-Patterns-For-Building-Json-Apis-and-web-applications.git
    cd greenlight
    ```
 
@@ -63,11 +62,13 @@ DB_NAME=<your_db_name>
    Set up the `.env` file with your database and email configurations.
 
 3. **Run Database Migrations**
+
    ```bash
    make db/migrations/up
    ```
 
 4. **Start the API Server**
+
    ```bash
    make run/api
    ```
@@ -110,7 +111,7 @@ The project includes a **Makefile** for interacting with the application, runnin
 ### Development
 
 - **`make run/api`**: Start the application.
-- **`make db/psql`**: Connect to the database via psql.
+- **`make db/psql`**: Connect to the database via `psql`.
 - **`make db/migrations/new name=<name>`**: Create a new database migration.
 - **`make db/migrations/up`**: Apply database migrations.
 
@@ -131,7 +132,34 @@ The project includes a **Makefile** for interacting with the application, runnin
 
 ### Information and Debugging
 
-- **`make info`**: Display configuration details like Nexus URL, repository, project name, and more.
+- **`make info`**: Display configuration details like Nexus URL, repository, and project name.
 
 ---
 
+### Running with Docker Compose
+
+To run the application with Docker Compose:
+
+1. Create a `.env` file with the following:
+
+   ```bash
+   DB_USER=greenlight # Or your custom database user
+   DB_PASSWORD=<your_db_password>
+   DB_NAME=greenlight # Or your custom database name
+   ```
+
+2. Run the application:
+
+   ```bash
+   docker compose -f movieCompose.yaml up -d
+   ```
+
+   The API will start on port `4000`.
+
+3. To stop the application:
+
+   ```bash
+   docker compose -f movieCompose.yaml down -v
+   ```
+
+   (Use the `-v` flag to remove any persistent data volumes.)
